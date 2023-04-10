@@ -17,7 +17,7 @@ def isPrime(num):
 
 def generatePrimeNumber():
     while True:
-        num = random.randint(0, pow(2, 32) - 1)
+        num = random.randint(0, pow(2, 20) - 1)
         if isPrime(num):
             return num
  
@@ -84,6 +84,11 @@ def decode(decryptedText):
         
     return result
 
+def processInput(msg):
+    if (len(msg) % GROUP_SIZE != 0):
+        msg += (" " * (((len(msg) // GROUP_SIZE + 1) * GROUP_SIZE) - len(msg)))
+    return msg.lower()
+
 def encrypt(plainText, publicKey):
     encodedText = encode(plainText)
     e, n = publicKey
@@ -127,17 +132,16 @@ def run():
         while True:
             if (send):
                 msg = str(input("You: "))
-                if (len(msg) % 5 != 0):
-                    msg += (" " * (((len(msg) // 5 + 1) * 5) - len(msg)))
+                msg = processInput(msg)
                 index = 0
-                N = str(len(msg) // 5).encode()
+                N = str(len(msg) // GROUP_SIZE).encode()
                 conn.send(N) if Type == "1" else s.send(N)
-                for i in range(len(msg) // 5):
-                    C = encrypt(msg[index: index+5].lower(), PU)
+                for i in range(len(msg) // GROUP_SIZE):
+                    C = encrypt(msg[index: index+GROUP_SIZE], PU)
                     conn.send(str(C).encode()) if Type == "1" else s.send(str(C).encode())
-                    index += 5
+                    index += GROUP_SIZE
                 send ^= 1
-                if (msg == "bye  "):
+                if (msg == "bye" + (" " * (GROUP_SIZE - 3))):
                     break
             else:
                 numberOfPackets = conn.recv(PACKET_SIZE).decode() if Type == "1" else s.recv(PACKET_SIZE).decode()
@@ -147,7 +151,7 @@ def run():
                     M = decrypt(int(C), privateKey)
                     result += M
                 print("User: ", result)
-                if (result == "bye  "):
+                if (result == "bye" + (" " * (GROUP_SIZE - 3))):
                     break
                 send ^= 1
         
