@@ -96,22 +96,6 @@ def decrypt(cipherText, privateKey):
     plainText = decode(decryptedText)
     return plainText
 
-def RSA(plainText):
-    publicKey, privateKey = generateKeys()
-    
-    if (len(plainText) % 5 != 0):
-        plainText += (" " * (((len(plainText) // 5 + 1) * 5) - len(plainText)))
-        
-    result = ""
-    index = 0
-    for i in range(len(plainText) // 5):
-        C = encrypt(plainText[index: index+5], publicKey)
-        M = decrypt(C, privateKey)
-        result += M
-        index += 5
-        
-    return result
-
 def run():
     send = 1
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
