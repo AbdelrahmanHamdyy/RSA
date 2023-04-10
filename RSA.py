@@ -31,9 +31,9 @@ def generatePublicKey():
     phiN = (p - 1) * (q - 1)
     
     # Generate e
-    e = random.randint(0, phiN - 1)
+    e = random.randint(1, phiN - 1)
     while math.gcd(e, phiN) != 1:
-        e = random.randint(0, phiN - 1)
+        e = random.randint(1, phiN - 1)
     
     # Set public key
     publicKey = (e, n)
