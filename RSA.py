@@ -123,6 +123,7 @@ def run():
             PU = (e, n)
         else:
             s.connect((HOST, PORT))
+            print("Client connected.. Start Chatting!")
             e = int(s.recv(PACKET_SIZE).decode())
             n = int(s.recv(PACKET_SIZE).decode())
             PU = (e, n)
