@@ -3,11 +3,8 @@ import random
 import sys
 import socket
 
-HOST = socket.gethostname()
-PORT = 5000
-PACKET_SIZE = 1024
-
 GROUP_SIZE = 5
+PACKET_SIZE = 1024
 
 def isPrime(num):
     for i in range(2, int(math.sqrt(num)) + 1):
@@ -49,6 +46,20 @@ def generatePrivateKey(publicKey, phiN):
     
     return privateKey
     
+def generateKeys():
+    publicKey, phiN = generatePublicKey()
+    privateKey = generatePrivateKey(publicKey, phiN)
+    return publicKey, privateKey
+
+def sendPublicKey(conn, publicKey):
+    conn.send(str(publicKey[0]).encode())
+    conn.send(str(publicKey[1]).encode())
+    
+def receivePublicKey(conn):
+    e = int(conn.recv(PACKET_SIZE).decode())
+    n = int(conn.recv(PACKET_SIZE).decode())
+    
+    return (e, n)
 
 def encode(plainText):
     numbers = []
@@ -101,63 +112,31 @@ def decrypt(cipherText, privateKey):
     plainText = decode(decryptedText)
     return plainText
 
-def run():
-    send = 1
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        publicKey, phiN = generatePublicKey()
-        privateKey = generatePrivateKey(publicKey, phiN)
-        Type = sys.argv[1]
-        PU = "PublicKey"
-        conn = "Connection"
-        if (Type == "1"): # Server
-            send = 0
-            s.bind((HOST, PORT))
-            s.listen(1)
-            print(f"Server is listening on {HOST}:{PORT}")
-            conn, address = s.accept()
-            print("Connection from: " + str(address))
-            conn.send(str(publicKey[0]).encode())
-            conn.send(str(publicKey[1]).encode())
-            e = int(conn.recv(PACKET_SIZE).decode())
-            n = int(conn.recv(PACKET_SIZE).decode())
-            PU = (e, n)
-        else:
-            s.connect((HOST, PORT))
-            print("Client connected.. Start Chatting!")
-            e = int(s.recv(PACKET_SIZE).decode())
-            n = int(s.recv(PACKET_SIZE).decode())
-            PU = (e, n)
-            s.send(str(publicKey[0]).encode())
-            s.send(str(publicKey[1]).encode())
-            
-        while True:
-            if (send):
-                msg = str(input("You: "))
-                msg = processInput(msg)
-                index = 0
-                N = str(len(msg) // GROUP_SIZE).encode()
-                conn.send(N) if Type == "1" else s.send(N)
-                for i in range(len(msg) // GROUP_SIZE):
-                    C = encrypt(msg[index: index+GROUP_SIZE], PU)
-                    conn.send(str(C).encode()) if Type == "1" else s.send(str(C).encode())
-                    index += GROUP_SIZE
-                send ^= 1
-                if (msg == "bye" + (" " * (GROUP_SIZE - 3))):
-                    break
-            else:
-                numberOfPackets = conn.recv(PACKET_SIZE).decode() if Type == "1" else s.recv(PACKET_SIZE).decode()
-                result = ""
-                for i in range(int(numberOfPackets)):
-                    C = conn.recv(PACKET_SIZE).decode() if Type == "1" else s.recv(PACKET_SIZE).decode()
-                    M = decrypt(int(C), privateKey)
-                    result += M
-                print("User: ", result)
-                if (result == "bye" + (" " * (GROUP_SIZE - 3))):
-                    break
-                send ^= 1
+def send(conn, publicKey):
+    msg = str(input("You: "))
+    msg = processInput(msg)
+    conn.send(str(len(msg) // GROUP_SIZE).encode())
+    
+    index = 0
+    for i in range(len(msg) // GROUP_SIZE):
+        C = encrypt(msg[index: index+GROUP_SIZE], publicKey)
+        conn.send(str(C).encode())
+        index += GROUP_SIZE
         
-        print("Connection Closed!")
-        conn.close() if Type == "1" else s.close()
+    if (msg == "bye" + (" " * (GROUP_SIZE - 3))):
+        return False
+    return True
 
-if __name__ == '__main__':
-    run()
+def receive(conn, privateKey):
+    numberOfPackets = conn.recv(PACKET_SIZE).decode()
+    
+    result = ""
+    for i in range(int(numberOfPackets)):
+        C = conn.recv(PACKET_SIZE).decode()
+        M = decrypt(int(C), privateKey)
+        result += M
+        
+    print("User: ", result)
+    if (result == "bye" + (" " * (GROUP_SIZE - 3))):
+        return False
+    return True
