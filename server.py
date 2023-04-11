@@ -7,14 +7,17 @@ PORT = 5000
 serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def runServer():
-    publicKey, privateKey = RSA.generateKeys()
-    turn = 0
-    
     serverSocket.bind((HOST, PORT))
     serverSocket.listen()
     print(f"Server is listening on {HOST}:{PORT}")
     conn, address = serverSocket.accept()
     print("Connection from: " + str(address))
+    
+    numberOfBits = input("Key size (Number of bits): ")
+    conn.send(numberOfBits.encode())
+    
+    publicKey, privateKey = RSA.generateKeys(int(numberOfBits))
+    turn = 1
     
     RSA.sendPublicKey(conn, publicKey)
     PU = RSA.receivePublicKey(conn)

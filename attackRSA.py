@@ -21,9 +21,10 @@ def attack(cipherText, publicKey):
     return plainText
 
 if __name__ == '__main__':
+    numberOfBits = int(input("Key size (Number of bits): "))
     plainText = input("Plain Text: ");
     plainText = RSA.processInput(plainText)
-    publicKey, phiN = RSA.generatePublicKey()
+    publicKey, phiN = RSA.generatePublicKey(numberOfBits)
     index = 0
     result = ""
     for i in range(len(plainText) // GROUP_SIZE):
