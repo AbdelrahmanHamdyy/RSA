@@ -1,10 +1,8 @@
 import math
 import random
-import sys
-import socket
 
 GROUP_SIZE = 5
-PACKET_SIZE = 1024
+PACKET_SIZE = 65536
 
 def isPrime(num):
     for i in range(2, int(math.sqrt(num)) + 1):
@@ -12,16 +10,16 @@ def isPrime(num):
             return False
     return True
 
-def generatePrimeNumber():
+def generatePrimeNumber(numberOfBits):
     while True:
-        num = random.randint(0, pow(2, 20) - 1)
+        num = random.randint(0, pow(2, numberOfBits // 2) - 1)
         if isPrime(num):
             return num
  
-def generatePublicKey():
+def generatePublicKey(numberOfBits):
     # Generate p & q
-    p = generatePrimeNumber()
-    q = generatePrimeNumber()
+    p = generatePrimeNumber(numberOfBits)
+    q = generatePrimeNumber(numberOfBits)
     
     # Calculate n & phiN
     n = p * q
@@ -46,8 +44,8 @@ def generatePrivateKey(publicKey, phiN):
     
     return privateKey
     
-def generateKeys():
-    publicKey, phiN = generatePublicKey()
+def generateKeys(numberOfBits):
+    publicKey, phiN = generatePublicKey(numberOfBits)
     privateKey = generatePrivateKey(publicKey, phiN)
     return publicKey, privateKey
 
@@ -58,7 +56,7 @@ def sendPublicKey(conn, publicKey):
 def receivePublicKey(conn):
     e = int(conn.recv(PACKET_SIZE).decode())
     n = int(conn.recv(PACKET_SIZE).decode())
-    
+
     return (e, n)
 
 def encode(plainText):
@@ -123,7 +121,7 @@ def send(conn, publicKey):
         conn.send(str(C).encode())
         index += GROUP_SIZE
         
-    if (msg == "bye" + (" " * (GROUP_SIZE - 3))):
+    if ("bye" in msg):
         return False
     return True
 
@@ -137,6 +135,6 @@ def receive(conn, privateKey):
         result += M
         
     print("User: ", result)
-    if (result == "bye" + (" " * (GROUP_SIZE - 3))):
+    if ("bye" in result):
         return False
     return True
