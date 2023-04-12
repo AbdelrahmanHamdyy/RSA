@@ -2,7 +2,7 @@ import math
 import random
 
 GROUP_SIZE = 5
-PACKET_SIZE = 65536
+PACKET_SIZE = 65535
 
 def isPrime(num):
     for i in range(2, int(math.sqrt(num)) + 1):
@@ -20,6 +20,7 @@ def generatePublicKey(numberOfBits):
     # Generate p & q
     p = generatePrimeNumber(numberOfBits)
     q = generatePrimeNumber(numberOfBits)
+    print("p & q Generated")
     
     # Calculate n & phiN
     n = p * q
@@ -29,6 +30,7 @@ def generatePublicKey(numberOfBits):
     e = random.randint(1, phiN - 1)
     while math.gcd(e, phiN) != 1:
         e = random.randint(1, phiN - 1)
+    print("e Generated")
     
     # Set public key
     publicKey = (e, n)
@@ -48,16 +50,6 @@ def generateKeys(numberOfBits):
     publicKey, phiN = generatePublicKey(numberOfBits)
     privateKey = generatePrivateKey(publicKey, phiN)
     return publicKey, privateKey
-
-def sendPublicKey(conn, publicKey):
-    conn.send(str(publicKey[0]).encode())
-    conn.send(str(publicKey[1]).encode())
-    
-def receivePublicKey(conn):
-    e = int(conn.recv(PACKET_SIZE).decode())
-    n = int(conn.recv(PACKET_SIZE).decode())
-
-    return (e, n)
 
 def encode(plainText):
     numbers = []
@@ -110,7 +102,7 @@ def decrypt(cipherText, privateKey):
     plainText = decode(decryptedText)
     return plainText
 
-def send(conn, publicKey):
+def sendMsg(conn, publicKey):
     msg = str(input("You: "))
     msg = processInput(msg)
     conn.send(str(len(msg) // GROUP_SIZE).encode())
@@ -125,7 +117,7 @@ def send(conn, publicKey):
         return False
     return True
 
-def receive(conn, privateKey):
+def receiveMsg(conn, privateKey):
     numberOfPackets = conn.recv(PACKET_SIZE).decode()
     
     result = ""
@@ -134,7 +126,7 @@ def receive(conn, privateKey):
         M = decrypt(int(C), privateKey)
         result += M
         
-    print("User: ", result)
+    print("User: ", result, flush=True)
     if ("bye" in result):
         return False
     return True
