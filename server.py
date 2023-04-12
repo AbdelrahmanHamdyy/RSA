@@ -1,5 +1,6 @@
 import RSA
 import socket
+import threading
 
 HOST = socket.gethostname()
 PORT = 5000
@@ -18,26 +19,25 @@ def runServer():
     print("Server: Number of bits sent", flush=True)
     
     publicKey, privateKey = RSA.generateKeys(int(numberOfBits))
-    print("Server: Keys generated")
-    turn = 1
+    print("Server: Keys generated", flush=True)
     
-    print("Server: Sending PU..", flush=True)
-    conn.send(str(publicKey[0]).encode()) # Send e
-    conn.send(str(publicKey[1]).encode()) # Send n
+    conn.send(' '.join(str(x) for x in publicKey).encode())
     print("Server: PU sent", flush=True)
-    print("Server: Receiving PU..", flush=True)
-    e = int(conn.recv(RSA.PACKET_SIZE).decode())
-    n = int(conn.recv(RSA.PACKET_SIZE).decode())
-    PU = (e, n)
-    print("Server: PU received", flush=True)
     
-    while True:
-        result = RSA.sendMsg(conn, PU) if turn else RSA.receiveMsg(conn, privateKey)
-        if (not result):
-            break
+    PU = conn.recv(RSA.PACKET_SIZE).decode()
+    PU = PU.split()
+    e = int(PU[0])
+    n = int(PU[1])
+    print("Server: PU received", flush=True)
+
+    T1 = threading.Thread(target=RSA.sendMsg, args=(conn, (e, n)))
+    T2 = threading.Thread(target=RSA.receiveMsg, args=(conn, privateKey))
+    T1.start()
+    T2.start()
         
-        turn ^= 1
-        
+    T1.join() 
+    T2.join()
+    
     conn.close()
     print("Server Side: Connection Closed!", flush=True)
 
