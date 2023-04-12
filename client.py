@@ -11,7 +11,6 @@ def runClient():
     clientSocket.connect((HOST, PORT))
     print("Client connected..", flush=True)
     numberOfBits = clientSocket.recv(RSA.PACKET_SIZE).decode()
-    print("Client: Number of bits received", flush=True)
     
     publicKey, privateKey = RSA.generateKeys(int(numberOfBits))
     print("Client: Keys generated", flush=True)
@@ -21,7 +20,7 @@ def runClient():
     e = int(PU[0])
     n = int(PU[1])
     print("Client: PU received", flush=True)
-    
+
     clientSocket.send(' '.join(str(x) for x in publicKey).encode())
     print("Client: PU sent", flush=True)
     

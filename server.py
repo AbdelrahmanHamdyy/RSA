@@ -16,14 +16,13 @@ def runServer():
     
     numberOfBits = input("Key size (Number of bits): ")
     conn.send(numberOfBits.encode())
-    print("Server: Number of bits sent", flush=True)
     
     publicKey, privateKey = RSA.generateKeys(int(numberOfBits))
     print("Server: Keys generated", flush=True)
-    
+
     conn.send(' '.join(str(x) for x in publicKey).encode())
     print("Server: PU sent", flush=True)
-    
+
     PU = conn.recv(RSA.PACKET_SIZE).decode()
     PU = PU.split()
     e = int(PU[0])

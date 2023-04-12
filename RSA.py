@@ -20,7 +20,6 @@ def generatePublicKey(numberOfBits):
     # Generate p & q
     p = generatePrimeNumber(numberOfBits)
     q = generatePrimeNumber(numberOfBits)
-    print("p & q Generated")
     
     # Calculate n & phiN
     n = p * q
@@ -30,7 +29,6 @@ def generatePublicKey(numberOfBits):
     e = random.randint(1, phiN - 1)
     while math.gcd(e, phiN) != 1:
         e = random.randint(1, phiN - 1)
-    print("e Generated")
     
     # Set public key
     publicKey = (e, n)
@@ -103,7 +101,8 @@ def decrypt(cipherText, privateKey):
     return plainText
 
 def sendMsg(conn, publicKey):
-    print("Start Chatting!")
+    print("Start Chatting!", flush=True)
+    print("---------------------------------------", flush=True)
     while True:
         msg = str(input())
         msg = processInput(msg)
