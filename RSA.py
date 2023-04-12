@@ -103,30 +103,31 @@ def decrypt(cipherText, privateKey):
     return plainText
 
 def sendMsg(conn, publicKey):
-    msg = str(input("You: "))
-    msg = processInput(msg)
-    conn.send(str(len(msg) // GROUP_SIZE).encode())
-    
-    index = 0
-    for i in range(len(msg) // GROUP_SIZE):
-        C = encrypt(msg[index: index+GROUP_SIZE], publicKey)
-        conn.send(str(C).encode())
-        index += GROUP_SIZE
+    print("Start Chatting!")
+    while True:
+        msg = str(input())
+        msg = processInput(msg)
+        conn.send(str(len(msg) // GROUP_SIZE).encode())
         
-    if ("bye" in msg):
-        return False
-    return True
+        index = 0
+        for i in range(len(msg) // GROUP_SIZE):
+            C = encrypt(msg[index: index+GROUP_SIZE], publicKey)
+            conn.send(str(C).encode())
+            index += GROUP_SIZE
+            
+        if ("bye" in msg):
+            break
 
 def receiveMsg(conn, privateKey):
-    numberOfPackets = conn.recv(PACKET_SIZE).decode()
-    
-    result = ""
-    for i in range(int(numberOfPackets)):
-        C = conn.recv(PACKET_SIZE).decode()
-        M = decrypt(int(C), privateKey)
-        result += M
+    while True:
+        numberOfPackets = conn.recv(PACKET_SIZE).decode()
         
-    print("User: ", result, flush=True)
-    if ("bye" in result):
-        return False
-    return True
+        result = ""
+        for i in range(int(numberOfPackets)):
+            C = conn.recv(PACKET_SIZE).decode()
+            M = decrypt(int(C), privateKey)
+            result += M
+            
+        print("-->", result, flush=True)
+        if ("bye" in result):
+            break
