@@ -30,5 +30,6 @@ if __name__ == '__main__':
     for i in range(len(plainText) // GROUP_SIZE):
         cipherText = RSA.encrypt(plainText[index: index+GROUP_SIZE], publicKey)
         result += attack(cipherText, publicKey)
-        index += GROUP_SIZE 
+        index += GROUP_SIZE
     print("Result: ", result)
+    print("Success!") if (plainText == result) else print("Failed!")
