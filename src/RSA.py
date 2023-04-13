@@ -1,5 +1,6 @@
 import math
 import random
+from sympy import randprime
 
 GROUP_SIZE = 5
 PACKET_SIZE = 65535
@@ -11,17 +12,14 @@ def isPrime(num):
     return True
 
 def generatePrimeNumber(numberOfBits):
-    while True:
-        num = random.randint(2, pow(2, numberOfBits // 2) - 1)
-        if isPrime(num):
-            return num
+    return randprime(2, 2**(numberOfBits))
  
 def generatePublicKey(numberOfBits):
     # Generate p & q
-    p = generatePrimeNumber(numberOfBits)
-    q = generatePrimeNumber(numberOfBits)
+    p = generatePrimeNumber(numberOfBits // 2)
+    q = generatePrimeNumber(numberOfBits // 2)
     while p == q:
-        q = generatePrimeNumber(numberOfBits)
+        q = generatePrimeNumber(numberOfBits // 2)
     
     # Calculate n & phiN
     n = p * q
