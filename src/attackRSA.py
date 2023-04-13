@@ -4,9 +4,15 @@ import RSA
 GROUP_SIZE = RSA.GROUP_SIZE
 
 def factorizeN(n):
-    for i in range(int(math.sqrt(n)), 2, -1):
-        if RSA.isPrime(i) and n % i == 0:
-            return i, n // i
+    if (n % 2 == 0):
+        return 2, n // 2
+    else:
+        rootN = int(math.sqrt(n))
+        if (rootN % 2 == 0):
+            rootN -= 1
+        for i in range(rootN, 2, -2):
+            if RSA.isPrime(i) and n % i == 0:
+                return i, n // i
         
 def getPrivateKey(publicKey):
     e, n = publicKey
@@ -30,9 +36,10 @@ if __name__ == '__main__':
     plainText = RSA.processInput(plainText)
     
     publicKey, phiN = RSA.generatePublicKey(numberOfBits)
+    actualPR = RSA.generatePrivateKey(publicKey, phiN);
     privateKey = getPrivateKey(publicKey)
     
     result = attack(plainText, publicKey, privateKey)
     
     print("Result: ", result)
-    print("Success!") if (plainText == result) else print("Failed!")
+    print("Success!") if (plainText == result and actualPR == privateKey) else print("Failed!")
