@@ -12,7 +12,7 @@ def isPrime(num):
 
 def generatePrimeNumber(numberOfBits):
     while True:
-        num = random.randint(0, pow(2, numberOfBits // 2) - 1)
+        num = random.randint(2, pow(2, numberOfBits // 2) - 1)
         if isPrime(num):
             return num
  
@@ -20,11 +20,13 @@ def generatePublicKey(numberOfBits):
     # Generate p & q
     p = generatePrimeNumber(numberOfBits)
     q = generatePrimeNumber(numberOfBits)
+    while p == q:
+        q = generatePrimeNumber(numberOfBits)
     
     # Calculate n & phiN
     n = p * q
     phiN = (p - 1) * (q - 1)
-    
+
     # Generate e
     e = random.randint(1, phiN - 1)
     while math.gcd(e, phiN) != 1:
