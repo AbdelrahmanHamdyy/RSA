@@ -30,6 +30,14 @@
 git clone https://github.com/AbdelrahmanHamdyy/RSA-Encryption
 ```
 
+<li>Install sympy.
+
+<br>
+
+```
+pip install sympy --user
+```
+
 <li>Navigate to src directory.
 
 <br>
