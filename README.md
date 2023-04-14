@@ -42,6 +42,10 @@ pip install sympy --user
 pip install matplotlib
 ```
 
+```
+pip install sockets
+```
+
 <li>Navigate to src directory.
 
 <br>
