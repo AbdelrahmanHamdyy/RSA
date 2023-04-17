@@ -14,23 +14,21 @@ def runServer():
     conn, address = serverSocket.accept()
     print("Connection from: " + str(address), flush=True)
     
-    numberOfBits = input("Key size (Number of bits): ")
-    conn.send(numberOfBits.encode())
+    name = input("Name: ")
+    conn.send(name.encode()) # Send name
     
-    publicKey, privateKey = RSA.generateKeys(int(numberOfBits))
-    print("Server: Keys generated", flush=True)
+    userName = conn.recv(RSA.PACKET_SIZE).decode() # Receive client's name
+    
+    publicKey, privateKey = RSA.generateKeys(int(RSA.KEY_SIZE)) # Generate Private and Public Keys
 
-    conn.send(' '.join(str(x) for x in publicKey).encode())
-    print("Server: PU sent", flush=True)
+    conn.send(' '.join(str(x) for x in publicKey).encode()) # Send Public Key
 
-    PU = conn.recv(RSA.PACKET_SIZE).decode()
+    PU = conn.recv(RSA.PACKET_SIZE).decode() # Receive Public Key from the Client
     PU = PU.split()
-    e = int(PU[0])
-    n = int(PU[1])
-    print("Server: PU received", flush=True)
+    e, n = int(PU[0]), int(PU[1]) # Extract e & n
 
     T1 = threading.Thread(target=RSA.sendMsg, args=(conn, (e, n)))
-    T2 = threading.Thread(target=RSA.receiveMsg, args=(conn, privateKey))
+    T2 = threading.Thread(target=RSA.receiveMsg, args=(conn, userName, privateKey))
     T1.start()
     T2.start()
         

@@ -10,22 +10,21 @@ clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def runClient():
     clientSocket.connect((HOST, PORT))
     print("Client connected..", flush=True)
-    numberOfBits = clientSocket.recv(RSA.PACKET_SIZE).decode()
+    userName = clientSocket.recv(RSA.PACKET_SIZE).decode() # Receive server's name
     
-    publicKey, privateKey = RSA.generateKeys(int(numberOfBits))
-    print("Client: Keys generated", flush=True)
+    name = input("Name: ")
+    clientSocket.send(name.encode()) # Send name
+    
+    publicKey, privateKey = RSA.generateKeys(int(RSA.KEY_SIZE)) # Generate Private and Public Key
 
-    PU = clientSocket.recv(RSA.PACKET_SIZE).decode()
+    PU = clientSocket.recv(RSA.PACKET_SIZE).decode() # Receive Public Key from the Server
     PU = PU.split()
-    e = int(PU[0])
-    n = int(PU[1])
-    print("Client: PU received", flush=True)
+    e, n = int(PU[0]), int(PU[1]) # Extract e & n
 
-    clientSocket.send(' '.join(str(x) for x in publicKey).encode())
-    print("Client: PU sent", flush=True)
+    clientSocket.send(' '.join(str(x) for x in publicKey).encode()) # Send Public Key
     
     T1 = threading.Thread(target=RSA.sendMsg, args=(clientSocket, (e, n)))
-    T2 = threading.Thread(target=RSA.receiveMsg, args=(clientSocket, privateKey))
+    T2 = threading.Thread(target=RSA.receiveMsg, args=(clientSocket, userName, privateKey))
     T1.start()
     T2.start()
 
