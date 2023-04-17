@@ -1,9 +1,11 @@
 import math
 import random
 from sympy import randprime
+from colorama import Fore, Style
 
 GROUP_SIZE = 5
 PACKET_SIZE = 65535
+KEY_SIZE = 128
 
 def isPrime(num):
     for i in range(2, int(math.sqrt(num)) + 1):
@@ -12,7 +14,7 @@ def isPrime(num):
     return True
 
 def generatePrimeNumber(numberOfBits):
-    return randprime(2, 2**(numberOfBits))
+    return randprime(2, pow(2, numberOfBits))
  
 def generatePublicKey(numberOfBits):
     # Generate p & q
@@ -117,7 +119,7 @@ def sendMsg(conn, publicKey):
         if ("bye" in msg):
             break
 
-def receiveMsg(conn, privateKey):
+def receiveMsg(conn, name, privateKey):
     while True:
         numberOfPackets = conn.recv(PACKET_SIZE).decode()
         
@@ -127,6 +129,6 @@ def receiveMsg(conn, privateKey):
             M = decrypt(int(C), privateKey)
             result += M
             
-        print("-->", result, flush=True)
+        print(Fore.BLUE + f"{name}: {result}", Style.RESET_ALL, flush=True)
         if ("bye" in result):
             break
