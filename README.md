@@ -70,8 +70,6 @@ python server.py
 python client.py
 ```
 
-<li>Enter number of bits for the key & start chatting!
-
 <br>
 
 <li>To run the attack:
